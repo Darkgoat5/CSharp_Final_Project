@@ -1,4 +1,7 @@
 using MovieTracker.WebAPI.Repository;
+using Microsoft.EntityFrameworkCore;
+using MovieTracker.WebAPI.DB;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,7 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddSingleton<IMovieRepository, MovieRepository>();
+// Use scoped for repositories that depend on a DbContext (DbContext is scoped)
+builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+builder.Services.AddDbContext<MovieDBContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

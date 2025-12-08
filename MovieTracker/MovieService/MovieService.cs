@@ -12,6 +12,11 @@ namespace MovieTracker.MovieService
     {
         public ObservableCollection<Movie> Movies { get; } = new ObservableCollection<Movie>();
 
+        public MovieService() 
+        { 
+            
+        }
+
         public void AddMovie(Movie movie)
         {
             Movies.Add(movie);
