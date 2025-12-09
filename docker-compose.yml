@@ -1,0 +1,68 @@
+services:
+  mysql:
+    # use mysql 8 version from docker hub
+    image: mysql:8.0
+    container_name: movietracker-mysql
+    
+    # sets environment variables for mysql inside the container
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: movietracker
+      MYSQL_USER: api
+      MYSQL_PASSWORD: api
+    
+    # maps port 3306 on host to port 3306 in container
+    ports:
+      - "3306:3306"
+    
+    # stores mysql database files in a docker volume, so data survives container restarts
+    volumes:
+      - mysql-data:/var/lib/mysql
+    
+    # puts the mysql container on the movietracker-network custom network so it can communicate with other containers
+    networks:
+      - movietracker-network
+    
+    # pings mysql every 
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]  # command to test if mysql is up
+      interval: 10s                        # check every 10 seconds
+      timeout: 5s                          # wait max 5 seconds for response
+      retries: 5                           # try 5 times before marking as unhealthy
+
+  api:
+    # build web api from dockerfile in movietracker.webapi folder
+    build:
+      context: .
+      dockerfile: MovieTracker.WebAPI/Dockerfile
+    
+    # container name, used to access API
+    container_name: movietracker-api
+    
+    # environment variables for API container
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development           # run development mode
+      - ASPNETCORE_HTTP_PORTS=8080                   # listen on port 8080 inside container
+      - ConnectionStrings__DefaultConnection=server=mysql;database=movietracker;user=api;password=api;  # database connection string
+    
+    # map port 5000 on host to port 8080 in container
+    ports:
+      - "5000:8080"
+    
+    # wait for healthy mysql before starting API
+    depends_on:
+      mysql:
+        condition: service_healthy
+    
+    # add to same network as mysql container
+    networks:
+      - movietracker-network
+
+# define volumes for persistent storage
+volumes:
+  mysql-data:
+
+# custom networks in the docker
+networks:
+  movietracker-network:                    # custom network used by mysql and api containers
+    driver: bridge                         # use bridge driver

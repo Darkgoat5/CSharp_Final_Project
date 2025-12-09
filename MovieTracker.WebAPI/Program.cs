@@ -4,22 +4,21 @@ using MovieTracker.WebAPI.DB;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-// Use scoped for repositories that depend on a DbContext (DbContext is scoped)
+
 builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+
 builder.Services.AddDbContext<MovieDBContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// applies the DBContext migration at startup
+using (var scope = app.Services.CreateScope())
 {
-    app.MapOpenApi();
+    var dbContext = scope.ServiceProvider.GetRequiredService<MovieDBContext>();
+    dbContext.Database.Migrate();
 }
 
 app.UseHttpsRedirection();
