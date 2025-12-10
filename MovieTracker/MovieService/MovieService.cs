@@ -7,20 +7,24 @@ using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Net.Http.Json;
 using MovieTracker.Models;
+using Microsoft.Maui.Devices;
 
 namespace MovieTracker.MovieService
 {
     public class MovieService: IMovieService
     {
         private readonly HttpClient _httpClient;
-        private const string BaseUrl = "http://localhost:5000/api/MovieTrackerAPI/";
+
+        // https://learn.microsoft.com/en-us/dotnet/maui/data-cloud/local-web-services?view=net-maui-10.0
+        // also in order for android emulator to connect to localhost permission must be granted in /Platforms/Android/AndroidManifest.xml
+        private string ConnectingFrom = DeviceInfo.Platform == DevicePlatform.Android ? "10.0.2.2:5000" : "localhost:5000";
 
         public ObservableCollection<Movie> Movies { get; } = new ObservableCollection<Movie>();
 
         public MovieService(HttpClient httpClient) 
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri(BaseUrl);
+            _httpClient.BaseAddress = new Uri("http://" + ConnectingFrom + "/api/MovieTrackerAPI/");
         }
 
         public async Task LoadMoviesAsync()

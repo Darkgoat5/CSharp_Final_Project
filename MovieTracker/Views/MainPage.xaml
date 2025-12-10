@@ -13,21 +13,32 @@
                 SelectedItem="{Binding SelectedMovie, Mode=TwoWay}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <StackLayout Orientation="Horizontal" Padding="10">
-                            <Label Text="{Binding Title}"
-                               FontSize="18" />
-                            <Label Text="-" FontSize="18" Margin="6,0" /> 
-        <!-- margin to create illusion of spaces before and after dash, normal spaces filtered out by default -->
-                            <Label Text="{Binding Genre}"
-                               FontSize="18" />
-                            <Label Text=" - (" FontSize="18"/>
-                            <Label Text="{Binding Year}"
-                               FontSize="18" />
-                            <Label Text=")" FontSize="18"/>
-                            <Label Text=" - Rating: " FontSize="18"/>
-                            <Label TextColor="Gold" Text="{Binding Rating}"
-                               FontSize="18" />
-                        </StackLayout>
+                        <Grid Padding="10" ColumnDefinitions="*, Auto">
+                            <StackLayout Orientation="Vertical" Grid.Column="0" Spacing="4">
+                                <!-- tailtruncation wraps text when its too long -->
+                                <Label Text="{Binding Title}"
+                                       FontSize="18"
+                                       LineBreakMode="TailTruncation"
+                                       MaxLines="2" />
+
+                                <StackLayout Orientation="Horizontal" Spacing="6">
+                                    <Label Text="{Binding Genre}"
+                                           FontSize="14"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="1" />
+
+                                    <Label Text="-" FontSize="14" />
+
+                                    <Label Text="{Binding Year}"
+                                           FontSize="14"/>
+                                </StackLayout>
+                            </StackLayout>
+
+                            <StackLayout Orientation="Horizontal" Grid.Column="1" VerticalOptions="Center" Spacing="6">
+                                <Label Text="Rating:" FontSize="14" />
+                                <Label TextColor="Gold" Text="{Binding Rating}" FontSize="14" />
+                            </StackLayout>
+                        </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
