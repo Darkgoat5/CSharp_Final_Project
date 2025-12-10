@@ -7,6 +7,7 @@ namespace MovieTracker.WebAPI.DB
     {
         public MovieDBContext(DbContextOptions<MovieDBContext> options) : base(options) { }
 
+        // represents the Movies table in the DB
         public DbSet<Movie> Movies { get; set; } = null!;
     }
 }

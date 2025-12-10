@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace MovieTracker.ViewModels
 {
-    internal class AddMoviePageViewModel : INotifyPropertyChanged
+    public class AddMoviePageViewModel : INotifyPropertyChanged
     {
-        public IMovieService MovieService => DependencyService.Get<IMovieService>();
+        private readonly IMovieService _movieService;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -30,18 +30,20 @@ namespace MovieTracker.ViewModels
 
         public int _Id { get; set; }
 
-        public AddMoviePageViewModel()
+        public AddMoviePageViewModel(IMovieService movieService)
         {
+            _movieService = movieService;
             _selectedDate = DateTime.Today; // set date of datepicker to today
-            AddMovieCommand = new Command(AddMovie, CanAddMovie);
+            AddMovieCommand = new Command(async () => await AddMovie(), CanAddMovie);
             ButtonText = "Add Movie";
             IsEditMode = false;
             Cancelable = false;
         }
 
-        public AddMoviePageViewModel(Movie ExistingMovie)
+        public AddMoviePageViewModel(IMovieService movieService, Movie ExistingMovie)
         {
-            AddMovieCommand = new Command(AddMovie, CanAddMovie);
+            _movieService = movieService;
+            AddMovieCommand = new Command(async () => await AddMovie(), CanAddMovie);
             CancelCommand = new Command(() => _ = RequestClose?.Invoke());
             ButtonText = "Save Edited Movie";
             _Id = ExistingMovie.Id;
@@ -53,7 +55,7 @@ namespace MovieTracker.ViewModels
             Cancelable = true;
         }
 
-        private void AddMovie()
+        private async Task AddMovie()
         {
             var m = new Movie
             {
@@ -66,13 +68,13 @@ namespace MovieTracker.ViewModels
             if (IsEditMode)
             {
                 m.Id = _Id;
-                MovieService.EditMovie(m); // use Edit function from movie service
+                await _movieService.EditMovieAsync(m); // uses the async edit function from movie service
                 _ = RequestClose?.Invoke(); // _ -> fire and forget, prevents the delegate from leaving the Task unobserved
             }
             else 
             {
-                m.Id = MovieService.GetNextId();
-                MovieService.AddMovie(m); // use Add function from movie service
+                m.Id = _movieService.GetNextId();
+                await _movieService.AddMovieAsync(m); // use async Add function from movie service
             }
 
             NewTitle = string.Empty;

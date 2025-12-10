@@ -11,8 +11,8 @@ namespace MovieTracker.ViewModels
 {
     public class MainPageViewModel : INotifyPropertyChanged
     {
-        public IMovieService MovieService => DependencyService.Get<IMovieService>();
-        public ObservableCollection<Movie> MovieList => MovieService.Movies;
+        private readonly IMovieService _movieService;
+        public ObservableCollection<Movie> MovieList => _movieService.Movies;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -37,21 +37,38 @@ namespace MovieTracker.ViewModels
             }
         }
 
-        public MainPageViewModel()
+        public MainPageViewModel(IMovieService movieService)
         {
-            DeleteMovieCommand = new Command(DeleteSelectedMovie, () => SelectedMovie != null);
+            _movieService = movieService;
+            DeleteMovieCommand = new Command(async () => await DeleteSelectedMovie(), () => SelectedMovie != null);
             EditMovieCommand = new Command(EditSelectedMovie, () => SelectedMovie != null);
+            
+            // start loading movies on creation of viewmodel
+            _ = LoadMoviesAsync();
         }
 
-        private void DeleteSelectedMovie()
+        private async Task LoadMoviesAsync()
         {
-            MovieList.Remove(SelectedMovie);
+            await _movieService.LoadMoviesAsync();
+        }
+
+        private async Task DeleteSelectedMovie()
+        {
+            // selectedmovie can never be NULL because of canexecute on command
+            await _movieService.DeleteMovieAsync(SelectedMovie);
             SelectedMovie = null;
         }
 
         private void EditSelectedMovie()
         {
-            Application.Current.MainPage.Navigation.PushModalAsync(new AddMoviePage(SelectedMovie));
+            // get the current first page of the app
+            var page = Application.Current?.Windows[0]?.Page;
+            if (page != null)
+            {
+                // same as with delete, can never be null because of canexecute
+                // pushes the add movie page as a modal with the selected movie for editing
+                page.Navigation.PushModalAsync(new AddMoviePage(_movieService, SelectedMovie));
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ using MovieTracker.WebAPI.Repository;
 
 namespace MovieTracker.WebAPI.Controllers
 {
+    // endpoint URL/api/MovieTrackerAPI 
     [Route("api/[controller]")]
     [ApiController]
     public class MovieTrackerAPIController : ControllerBase
@@ -23,6 +24,7 @@ namespace MovieTracker.WebAPI.Controllers
             return Ok(movies);
         }
 
+        // never actually gets used, just used for testing the API seperate
         [HttpGet("{id}")]
         public async Task<ActionResult<Movie>> GetMovieById(int id)
         {
@@ -38,6 +40,7 @@ namespace MovieTracker.WebAPI.Controllers
         public async Task<ActionResult> DeleteMovie(int id)
         {
             await _repo.DeleteMovieAsync(id);
+            // returns 204 status code
             return NoContent();
         }
 
@@ -45,6 +48,7 @@ namespace MovieTracker.WebAPI.Controllers
         public async Task<ActionResult> AddMovie([FromBody] Movie movie)
         {
             await _repo.AddMovieAsync(movie);
+            // returns 201 status code with location header, this is returned to follow REST convention
             return CreatedAtAction(nameof(GetMovieById), new { id = movie.Id }, movie);
         }
 
@@ -52,6 +56,7 @@ namespace MovieTracker.WebAPI.Controllers
         public async Task<ActionResult> UpdateMovie(int id, [FromBody] Movie updatedMovie)
         {
             await _repo.UpdateMovieAsync(id, updatedMovie);
+            // returns 204 status code
             return NoContent();
         }
     }

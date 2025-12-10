@@ -13,9 +13,10 @@ namespace MovieTracker.MovieService
     public interface IMovieService
     {
         ObservableCollection<Movie> Movies { get; }
-        void AddMovie(Movie movie);
-        void DeleteMovie(Movie movie);
-        void EditMovie(Movie movie);
+        Task LoadMoviesAsync();
+        Task AddMovieAsync(Movie movie);
+        Task DeleteMovieAsync(Movie movie);
+        Task EditMovieAsync(Movie movie);
         int GetNextId();
     }
 }

@@ -1,6 +1,6 @@
 using MovieTracker.Models;
 using MovieTracker.ViewModels;
-
+using MovieTracker.MovieService;
 
 namespace MovieTracker;
 
@@ -8,11 +8,17 @@ public partial class AddMoviePage : ContentPage
 {
     AddMoviePageViewModel vm;
 
-    public AddMoviePage(Movie existing = null)
+    public AddMoviePage(AddMoviePageViewModel viewModel)
     {
         InitializeComponent();
-        // if no existing movie is passed, we add a new one, otherwise we edit the existing one
-        vm = existing == null ? new AddMoviePageViewModel() : new AddMoviePageViewModel(existing);
+        vm = viewModel;
+        BindingContext = vm;
+    }
+
+    public AddMoviePage(IMovieService movieService, Movie existing)
+    {
+        InitializeComponent();
+        vm = new AddMoviePageViewModel(movieService, existing);
         BindingContext = vm;
         // sets up a listener/delegate for when RequestClose.Invoke is called in the viewmodel
         vm.RequestClose = () => Navigation.PopModalAsync();
